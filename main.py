@@ -1,7 +1,11 @@
 import os
 
 from functools import wraps
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from datetime import datetime
+import random
+from flask import Flask, request, render_template, redirect, url_for, flash, session, send_from_directory, abort
+
+
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, or_
@@ -137,9 +141,24 @@ def panel():
     user = User.query.filter(User.username == username).first()
     return render_template("panel.html", user=user)
 
+@app.route('/up_photo', methods=['POST'])
+@login_required
+def up_photo():
+     file = request.files.get("txt_photo")
+     if (not file.filename.endswith('.pdf')):
+         # handle error message
+         print("invalid file type")
+         return redirect(url_for('panel'))
+
+     file_name = session.get("username", "test") + datetime.now().strftime('%Y-%m-%d') + str(random.randint(1,20)) + '.pdf'
+     file_path = os.path.join(basedir, "database", "pdfs", file_name)
+     file.save(file_path)
+
+     return render_template("up.html")
+
 
 
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=3000, debug=True)

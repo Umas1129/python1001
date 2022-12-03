@@ -1,21 +1,23 @@
 <DOCTYPE html>
     <html lang="zh-han">
-        <head>
-            <title>個人中心</title>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css')}}" >
-        </head>
-        <body>
-        <form method="post" action="http://localhost:5000/up_photo" enctype="multipart/form-data" class="login">
-            <h3>個人中心</h3>
-            <p>姓名：{{user.username}}</p>
-            <p>密碼：{{user.password}}</p>
-            <p>郵箱：{{user.email}}</p>
-            <input type="file" size="30" name="txt_photo"/>
-            <br>
-            <input type="text" class="txt_input" name="name" style="margin-top:15px;"/>
-            <input type="submit" value="提交信息" class="button-new" style="margin-top:15px;"/>
-        </form>
-        </body>
+    <head>
+         <title>個人中心</title>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1">
+         <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css')}}">
+     </head>
+
+     <body>
+         <form method="post" action="/up_photo" enctype="multipart/form-data" class="login">
+             <h3>個人中心</h3>
+             <p>姓名：{{user.username}}</p>
+             <p>密碼：{{user.password}}</p>
+             <p>郵箱：{{user.email}}</p>
+             <input type="file" size="30" name="txt_photo" />
+             <br>
+             <input type="text" class="txt_input" name="name" style="margin-top:15px;" />
+             <input type="submit" value="提交信息" class="button-new" style="margin-top:15px;" />
+
+         </form>
+     </body>
     </html>
