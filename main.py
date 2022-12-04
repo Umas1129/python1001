@@ -32,9 +32,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # 定義ORM
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True)
-    password = db.Column(db.String(80))
-    email = db.Column(db.String(120), unique=True)
+    userRole = db.Column(db.String(20), nullable=False, default='user')
+    username = db.Column(db.String(80), nullable=False, unique=True)
+    password = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -154,10 +155,13 @@ def up_photo():
      file_path = os.path.join(basedir, "database", "pdfs", file_name)
      file.save(file_path)
 
-     return render_template("up.html")
+     return render_template("up.html", filename=file_name)
 
 
-
+@app.route('/download/<filename>', methods=['GET'])
+@login_required
+def download(filename):
+     return send_from_directory(os.path.join(basedir, "database", "pdfs"), filename, as_attachment=True)
 
 
 if __name__ == '__main__':
