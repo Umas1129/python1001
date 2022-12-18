@@ -96,13 +96,20 @@ def home():
 def login():
     error = None
     if request.method == 'POST':
-        if valid_login(request.form['username'], request.form['password']):
-            flash("成功登入！")
-            session['username'] = request.form.get('username')
-            return redirect(url_for('home'))
+        if request.form['username'] == 'admin':
+            if valid_login(request.form['username'], request.form['password']):
+                flash("成功登入！")
+                session['username'] = request.form.get('username')
+                return redirect(url_for('home'))
+            else:
+                error = '錯誤的使用者名稱或密碼！'
         else:
-            error = '錯誤的使用者名稱或密碼！'
-
+            if  valid_login(request.form['username'], request.form['password']):
+                flash("成功登入！")
+                session['username'] = request.form.get('username')
+                return redirect(url_for('hello'))
+            else:
+                error = '錯誤的使用者名稱或密碼！'
     return render_template('login.html', error=error)
 
 
@@ -133,6 +140,19 @@ def regist():
 
     return render_template('regist.html', error=error)
 
+@app.route('/hello')
+@login_required
+def hello():
+    return render_template("hello.html", username=session.get('username'))
+
+@app.route('/hellopanel')
+@login_required
+def hellopanel():
+    username = session.get('username')
+    user = User.query.filter(User.username == username).first()
+    return render_template("hellopanel.html", user=user)
+
+
 
 # 5.個人中心
 @app.route('/panel')
@@ -151,7 +171,7 @@ def up_photo():
          print("invalid file type")
          return redirect(url_for('panel'))
 
-     file_name = session.get("username", "test") + datetime.now().strftime('%Y-%m-%d') + str(random.randint(1,20)) + '.pdf'
+     file_name = request.values["name"] + datetime.now().strftime('%Y-%m-%d') + str(random.randint(1,20)) + '.pdf'
      file_path = os.path.join(basedir, "database", "pdfs", file_name)
      file.save(file_path)
 
