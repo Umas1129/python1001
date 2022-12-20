@@ -10,14 +10,14 @@
      <body>
          <form method="post" action="/up_photo" enctype="multipart/form-data" class="login">
              <h3>個人中心</h3>
-             <p>姓名：{{user.username}}</p>
-             <p>密碼：{{user.password}}</p>
-             <p>郵箱：{{user.email}}</p>
-             <input type="file" size="30" name="txt_photo" />
+             <input type="file" size="30" name="txt_photo" multiple />
              <br>
-             <input type="text" class="txt_input" name="name" style="margin-top:15px;" />
+             職號<input type="text" class="txt_input" name="name" style="margin-top:15px;" />
              <input type="submit" value="提交信息" class="button-new" style="margin-top:15px;" />
-
+             <a href="{{ url_for('logout') }}">登出</a>
+             {% if error %}
+            <p>{{error}}</p>
+             {% endif %}
          </form>
      </body>
     </html>

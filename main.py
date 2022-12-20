@@ -1,17 +1,15 @@
 import os
-
+import base64
 from functools import wraps
 from datetime import datetime
 import random
-from flask import Flask, request, render_template, redirect, url_for, flash, session, send_from_directory, abort
+from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import send_from_directory
 
 
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, or_
-
-
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database/db.sql')
@@ -21,10 +19,6 @@ app.secret_key = '\xc9ixnRb\xe40\xd4\xa5\x7f\x03\xd0y6\x01\x1f\x96\xeao+\x8a\x9f
 db = SQLAlchemy(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-
-
-
 ############################################
 # 資料庫
 ############################################
@@ -32,7 +26,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # 定義ORM
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    userRole = db.Column(db.String(20), nullable=False, default='user')
     username = db.Column(db.String(80), nullable=False, unique=True)
     password = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
@@ -116,7 +109,7 @@ def login():
 # 3.登出
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    del session["username"]
     return redirect(url_for('home'))
 
 
@@ -145,12 +138,38 @@ def regist():
 def hello():
     return render_template("hello.html", username=session.get('username'))
 
+
+
 @app.route('/hellopanel')
-@login_required
 def hellopanel():
     username = session.get('username')
     user = User.query.filter(User.username == username).first()
-    return render_template("hellopanel.html", user=user)
+    keyword = username
+    path = []
+    name = []
+
+    for root, dir_name, file_name in os.walk('./'):
+        abs_path = os.path.abspath(root)
+        for d in dir_name:
+            if keyword in d:
+                print(os.path.join(abs_path, d))
+        for f in file_name:
+            if keyword in f:
+                print(os.path.join(abs_path, f))
+                path.append(abs_path)
+                name.append(f)
+    print('\n')
+    img_stream = []
+    data = []
+    len_file = len(name) # len_file = file len name 3
+    for i in range(len(name)):
+        img_path = str(path[i]) +"\\" + str(name[i]) #路徑+檔名
+        data.append(img_path) #把路徑+檔名加入陣列
+        #img_path = r'C:\pythonProject1\static\pdfs\yyy2022-12-192.pdf'
+        #img_stream = return_img_stream(img_path)
+
+    return render_template("hellopanel.html", user=user,len_file = len_file,data=data,name=name)
+
 
 
 
@@ -165,24 +184,29 @@ def panel():
 @app.route('/up_photo', methods=['POST'])
 @login_required
 def up_photo():
+
      file = request.files.get("txt_photo")
      if (not file.filename.endswith('.pdf')):
-         # handle error message
+         # handle error message'
          print("invalid file type")
-         return redirect(url_for('panel'))
+         error = "錯誤檔案類型"
+         return render_template('panel.html',error=error)
 
-     file_name = request.values["name"] + datetime.now().strftime('%Y-%m-%d') + str(random.randint(1,20)) + '.pdf'
-     file_path = os.path.join(basedir, "database", "pdfs", file_name)
+     file_name = request.values["name"] + datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + str(random.randint(1,30)) + '.pdf'
+     file_path = os.path.join(basedir, "static", "pdfs", file_name)
+     print(file_path)
      file.save(file_path)
 
-     return render_template("up.html", filename=file_name)
+     return render_template("panel.html", filename=file_name)
 
 
-@app.route('/download/<filename>', methods=['GET'])
+@app.route('/download/<name>', methods=['GET'])
 @login_required
-def download(filename):
-     return send_from_directory(os.path.join(basedir, "database", "pdfs"), filename, as_attachment=True)
+def download(name):
+     return send_from_directory(os.path.join(basedir, "static", "pdfs"), name, as_attachment=True)
 
+
+#keyword = request.form['username']
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000, debug=True)
