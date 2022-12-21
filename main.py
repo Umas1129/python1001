@@ -5,6 +5,7 @@ from datetime import datetime
 import random
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask import send_from_directory
+import  hashlib
 
 
 
@@ -181,6 +182,21 @@ def panel():
     user = User.query.filter(User.username == username).first()
     return render_template("panel.html", user=user)
 
+def getNonce(sn,stn,pmd):
+    hz = '0000'
+    nonce, flag = 0, 0
+    while flag != 1:
+        md = hashlib.sha1()
+        nonce_hex = hex(nonce)[2:].zfill(8)
+        md.update(bytes.fromhex(hex(sn)[2:].zfill(8)))
+        md.update(stn.encode())
+        md.update(bytes.fromhex(nonce_hex))
+        md.update(bytes.fromhex(pmd))
+        nmd = md.hexdigest()
+        if nmd.find(hz) == 0: flag = 1
+        nonce += 1
+    return nonce
+
 @app.route('/up_photo', methods=['POST'])
 @login_required
 def up_photo():
@@ -192,12 +208,38 @@ def up_photo():
          error = "錯誤檔案類型"
          return render_template('panel.html',error=error)
 
+
      file_name = request.values["name"] + datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + str(random.randint(1,30)) + '.pdf'
      file_path = os.path.join(basedir, "static", "pdfs", file_name)
      print(file_path)
      file.save(file_path)
-
-     return render_template("panel.html", filename=file_name)
+     s1 = ''
+     h = open('chain.txt', 'r')
+     sl = h.readline()
+     while sl != '' and sl != '\n':
+         s1 += sl
+         dd = sl.split(',')
+         # print(dd)
+         pmd = dd[4].replace('\n', '')
+         sn = dd[0]
+         sl = h.readline()
+         # print(sl)
+     h.close()
+     md = hashlib.sha1()
+     sn = int(sn) + 1
+     nonce = getNonce(sn,file_name,pmd)
+     nonce_hex = hex(int(nonce))[2:].zfill(8)
+     md.update(bytes.fromhex(hex(sn)[2:].zfill(8)))
+     md.update(file_name.encode())
+     md.update(bytes.fromhex(nonce_hex))
+     md.update(bytes.fromhex(pmd))
+     nmd = md.hexdigest()
+     s2 = str(sn) + ',' + file_name + ',' + nonce_hex + ',' + pmd + ',' + nmd + '\n'
+     h = open('chain.txt', 'a')
+     h.write(s2)
+     h.close()
+     sus = "成功上鏈且上傳"+nmd
+     return render_template("panel.html", filename=file_name,sus=sus)
 
 
 @app.route('/download/<name>', methods=['GET'])
