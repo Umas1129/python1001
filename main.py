@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, or_
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database/db.sql')
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database/db.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.secret_key = '\xc9ixnRb\xe40\xd4\xa5\x7f\x03\xd0y6\x01\x1f\x96\xeao+\x8a\x9f\xe4'
 
