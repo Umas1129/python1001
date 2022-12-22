@@ -1,5 +1,4 @@
 import os
-import base64
 from functools import wraps
 from datetime import datetime
 import random
